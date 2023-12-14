@@ -1,0 +1,131 @@
+//Implement Stack as an ADT and use it to evaluate a prefix/postfix expression.
+#include <iostream>
+#include <stack>
+#include <cmath>
+
+using namespace std;
+
+class Stack {
+private:
+    static const int MAX_SIZE = 100;
+    int arr[MAX_SIZE];
+    int top;
+
+public:
+    Stack() : top(-1) {}
+
+    bool isEmpty() {
+        return top == -1;
+    }
+
+    bool isFull() {
+        return top == MAX_SIZE - 1;
+    }
+
+    void push(int value) {
+        if (!isFull()) {
+            arr[++top] = value;
+        } else {
+            cout << "Stack Overflow" << endl;
+        }
+    }
+
+    int pop() {
+        if (!isEmpty()) {
+            return arr[top--];
+        } else {
+            cout << "Stack Underflow" << endl;
+            return -1; // Assuming -1 as an error value
+        }
+    }
+
+    int peek() {
+        if (!isEmpty()) {
+            return arr[top];
+        } else {
+            cout << "Stack is empty" << endl;
+            return -1; // Assuming -1 as an error value
+        }
+    }
+};
+
+int evaluatePrefix(string expression) {
+    Stack stack;
+    int result = 0;
+
+    for (int i = expression.size() - 1; i >= 0; i--) {
+        char c = expression[i];
+
+        if (isdigit(c)) {
+            stack.push(c - '0');  // Convert char to int
+        } else if (c == '+' || c == '-' || c == '*' || c == '/') {
+            int operand1 = stack.pop();
+            int operand2 = stack.pop();
+
+            switch (c) {
+                case '+':
+                    stack.push(operand1 + operand2);
+                    break;
+                case '-':
+                    stack.push(operand1 - operand2);
+                    break;
+                case '*':
+                    stack.push(operand1 * operand2);
+                    break;
+                case '/':
+                    stack.push(operand1 / operand2);
+                    break;
+            }
+        }
+    }
+
+    result = stack.pop();
+    return result;
+}
+
+int evaluatePostfix(string expression) {
+    Stack stack;
+
+    for (int i = 0; i < expression.size(); ++i) {
+    char c = expression[i];
+
+    if (isdigit(c)) {
+        stack.push(c - '0');  // Convert char to int
+    } else if (c == '+' || c == '-' || c == '*' || c == '/') {
+        int operand2 = stack.pop();
+        int operand1 = stack.pop();
+
+        switch (c) {
+            case '+':
+                stack.push(operand1 + operand2);
+                break;
+            case '-':
+                stack.push(operand1 - operand2);
+                break;
+            case '*':
+                stack.push(operand1 * operand2);
+                break;
+            case '/':
+                stack.push(operand1 / operand2);
+                break;
+        }
+    }
+}
+
+
+    return stack.pop();
+}
+
+int main() {
+    // Example usage for prefix expression
+    string prefixExpression = "+*52*+37-84";
+    cout << "Prefix Expression: " << prefixExpression << endl;
+    cout << "Result: " << evaluatePrefix(prefixExpression) << endl;
+
+    // Example usage for postfix expression
+    string postfixExpression = "52*37+84-*+";
+    cout << "Postfix Expression: " << postfixExpression << endl;
+    cout << "Result: " << evaluatePostfix(postfixExpression) << endl;
+
+    return 0;
+}
