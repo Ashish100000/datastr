@@ -1,0 +1,173 @@
+// Write a program to implement insert and search operation in AVL trees.
+
+#include <iostream>
+#include <algorithm>
+
+class AVLNode {
+public:
+    int data;
+    AVLNode* left;
+    AVLNode* right;
+    int height;
+
+    AVLNode(int value) : data(value), left(NULL), right(NULL), height(1) {}
+};
+
+class AVLTree {
+private:
+    AVLNode* root;
+
+    int getHeight(AVLNode* node) {
+        if (node == NULL) {
+            return 0;
+        }
+        return node->height;
+    }
+
+    int getBalanceFactor(AVLNode* node) {
+        if (node == NULL) {
+            return 0;
+        }
+        return getHeight(node->left) - getHeight(node->right);
+    }
+
+    AVLNode* rotateRight(AVLNode* y) {
+        AVLNode* x = y->left;
+        AVLNode* T2 = x->right;
+
+        // Perform rotation
+        x->right = y;
+        y->left = T2;
+
+        // Update heights
+        y->height = 1 + std::max(getHeight(y->left), getHeight(y->right));
+        x->height = 1 + std::max(getHeight(x->left), getHeight(x->right));
+
+        return x;
+    }
+
+    AVLNode* rotateLeft(AVLNode* x) {
+        AVLNode* y = x->right;
+        AVLNode* T2 = y->left;
+
+        // Perform rotation
+        y->left = x;
+        x->right = T2;
+
+        // Update heights
+        x->height = 1 + std::max(getHeight(x->left), getHeight(x->right));
+        y->height = 1 + std::max(getHeight(y->left), getHeight(y->right));
+
+        return y;
+    }
+
+    AVLNode* insert(AVLNode* node, int value) {
+        // Perform standard BST insert
+        if (node == NULL) {
+            return new AVLNode(value);
+        }
+
+        if (value < node->data) {
+            node->left = insert(node->left, value);
+        } else if (value > node->data) {
+            node->right = insert(node->right, value);
+        } else {
+            // Duplicate values are not allowed in this simple example
+            return node;
+        }
+
+        // Update height of current node
+        node->height = 1 + std::max(getHeight(node->left), getHeight(node->right));
+
+        // Get the balance factor
+        int balance = getBalanceFactor(node);
+
+        // Perform rotations if necessary to maintain balance
+        if (balance > 1) {
+            if (value < node->left->data) {
+                // Left Left Case
+                return rotateRight(node);
+            } else {
+                // Left Right Case
+                node->left = rotateLeft(node->left);
+                return rotateRight(node);
+            }
+        }
+        if (balance < -1) {
+            if (value > node->right->data) {
+                // Right Right Case
+                return rotateLeft(node);
+            } else {
+                // Right Left Case
+                node->right = rotateRight(node->right);
+                return rotateLeft(node);
+            }
+        }
+
+        return node;
+    }
+
+    AVLNode* search(AVLNode* node, int value) {
+        if (node == NULL || node->data == value) {
+            return node;
+        }
+
+        if (value < node->data) {
+            return search(node->left, value);
+        }
+
+        return search(node->right, value);
+    }
+
+    void inorderTraversal(AVLNode* node) {
+        if (node != NULL) {
+            inorderTraversal(node->left);
+            std::cout << node->data << " ";
+            inorderTraversal(node->right);
+        }
+    }
+
+public:
+    AVLTree() : root(NULL) {}
+
+    void insert(int value) {
+        root = insert(root, value);
+    }
+
+    bool search(int value) {
+        return search(root, value) != NULL;
+    }
+
+    void displayBeforeInsertions() {
+        std::cout << "AVL Tree before insertions (Inorder Traversal): ";
+        inorderTraversal(root);
+        std::cout << std::endl;
+    }
+
+    void displayAfterInsertions() {
+        std::cout << "AVL Tree after insertions (Inorder Traversal): ";
+        inorderTraversal(root);
+        std::cout << std::endl;
+    }
+};
+
+int main() {
+    AVLTree avl;
+
+    avl.displayBeforeInsertions();
+
+    avl.insert(50);
+    avl.insert(30);
+    avl.insert(70);
+    avl.insert(20);
+    avl.insert(40);
+    avl.insert(60);
+    avl.insert(80);
+
+    avl.displayAfterInsertions();
+
+    int searchValue = 40;
+    std::cout << "Search for element " << searchValue << ": " << (avl.search(searchValue) ? "Found" : "Not Found") << std::endl;
+
+    return 0;
+}
